@@ -55,7 +55,9 @@ body.notes-off .notes { display:none; }
 .nav-btn.left { left:6px; } .nav-btn.right { right:6px; }
 .nav-btn svg { width:22px; height:22px; }
 
-.phone { width:392px; height:min(820px, 100%); background:#0d0f14; border-radius:44px; padding:8px; box-shadow:0 50px 100px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.04) inset; position:relative; }
+.phone-fit { position:relative; flex-shrink:0; }
+.phone-fit .phone { position:absolute; left:0; top:0; transform-origin:0 0; }
+.phone { width:392px; height:820px; background:#0d0f14; border-radius:44px; padding:8px; box-shadow:0 50px 100px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.04) inset; position:relative; }
 .phone .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:120px; height:28px; background:#0d0f14; border-radius:0 0 18px 18px; z-index:50; pointer-events:none; }
 .phone-inner { width:100%; height:100%; border-radius:36px; overflow:hidden; background:#fff; position:relative; color:var(--pb-text); }
 .screen { position:absolute; inset:0; display:flex; flex-direction:column; background:#fff; }
@@ -85,7 +87,7 @@ body.notes-off .notes { display:none; }
 .hint kbd { background:rgba(255,255,255,.08); border-radius:4px; padding:1px 6px; font-family:inherit; font-size:10px; color:#fff; }
 
 @media (max-width:1180px) { .main { grid-template-columns:230px 1fr 250px; } }
-@media (max-width:700px) { .stage { padding:8px 4px; } .phone { width:min(392px, 92vw); } .nav-btn { width:36px; height:36px; } .top .brand span { display:none; } }
+@media (max-width:700px) { .stage { padding:8px 4px; }  .nav-btn { width:36px; height:36px; } .top .brand span { display:none; } }
 @media (max-width:960px) { .main, body.notes-off .main { grid-template-columns:1fr; } .flavors, .notes { display:none; } .top .flow-title { display:none; } }
 
 /* ───── phone UI (Arvest) ───── */
@@ -324,7 +326,7 @@ input[type=range]::-moz-range-thumb { width:18px; height:18px; border-radius:50%
   <aside class="flavors" id="flavors"><h4>USE CASES</h4></aside>
   <div class="stage">
     <button class="nav-btn left" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <div class="phone"><div class="notch"></div><div class="phone-inner" id="phone"></div></div>
+    <div class="phone-fit" id="phoneFit"><div class="phone" id="phoneBox"><div class="notch"></div><div class="phone-inner" id="phone"></div></div></div>
     <button class="nav-btn right" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
   </div>
   <aside class="notes">
@@ -800,6 +802,22 @@ document.addEventListener('keydown', e=>{
 });
 const hm = (location.hash||'').match(/flavor([1-4])/); const q = hm ? hm[1] : new URLSearchParams(location.search).get('flavor');
 setFlavor(q && q>=1 && q<=4 ? q-1 : 0);
+</script>
+<script>
+(function(){
+  function fitPhone(){
+    var st=document.querySelector('.stage'), fit=document.getElementById('phoneFit'), ph=document.getElementById('phoneBox');
+    if(!st||!fit||!ph) return;
+    var cs=getComputedStyle(st);
+    var h=st.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+    var w=st.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    var k=Math.min(1,h/820,w/392); if(k<=0) k=1;
+    ph.style.transform='scale('+k+')';
+    fit.style.width=(392*k)+'px'; fit.style.height=(820*k)+'px';
+  }
+  window.addEventListener('resize',fitPhone); window.addEventListener('load',fitPhone);
+  document.addEventListener('DOMContentLoaded',fitPhone); setTimeout(fitPhone,50);
+})();
 </script>
 </body>
 </html>
